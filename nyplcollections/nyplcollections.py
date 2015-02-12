@@ -19,12 +19,12 @@ class NYPLsearch(object):
     # Return the captures for a given uuid
     # optional value withTitles=yes
     def captures(self, uuid, withTitles=False):
-        return self._get('/'.join([self.base, uuid]),
-                         {'withTitles': 'yes' if withTitles else 'no'})
+        url = '/'.join([self.base, uuid])
+        return self._get(url, withTitles='yes' if withTitles else 'no')
 
     # Return the item-uuid for a identifier.
     def uuid(self, type, val):
-        return self._get('/'.join([self.base, type, val]))
+        return self._get('/'.join((self.base, type, val)))
 
     # Search across all (without field) or in specific field
     # (valid fields at http://www.loc.gov/standards/mods/mods-outline.html)
@@ -34,7 +34,7 @@ class NYPLsearch(object):
 
     # Return a mods record for a given uuid
     def mods(self, uuid):
-        return self._get('/'.join([self.base, 'mods', uuid]))
+        return self._get('/'.join((self.base, 'mods', uuid)))
 
     # Generic get which handles call to api and setting of results
     # Return: results dict
