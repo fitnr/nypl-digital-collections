@@ -3,11 +3,15 @@
 import requests
 import xmltodict
 
+def stop():
+    raise StopIteration
 
 class NYPLsearch(object):
-    raw_results = None
-    results = None
+    raw_results = ''
+    results = dict()
+    request = dict()
     error = None
+    next_page = stop
 
     def __init__(self, token, format=None, page=None, per_page=None):
         self.token = token
@@ -52,6 +56,14 @@ class NYPLsearch(object):
 
         self.raw_results = r.text
         self.results = self._to_dict(r)['nyplAPI']['response']
+
+        self.request = r.json()['nyplAPI'].get('request', dict())
+
+        if self.request.get('totalPages') > self.request.get('page'):
+            del params['page']
+            self.next_page = lambda x: self._get(url, page=self.request.get('page', 0) + 1, **params)
+        else:
+            self.next_page = stop
 
         if self.results['headers']['status'] == 'error':
             self.error = {
