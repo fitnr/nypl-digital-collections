@@ -9,11 +9,11 @@ class NYPLsearch(object):
     results = None
     error = None
 
-    def __init__(self, token, format='json', page=1, per_page=10):
+    def __init__(self, token, format=None, page=None, per_page=None):
         self.token = token
-        self.page = page
-        self.per_page = per_page
-        self.format = format
+        self.format = format or 'json'
+        self.page = page or 1
+        self.per_page = per_page or 10
         self.base = "http://api.repo.nypl.org/api/v1/items"
 
     # Return the captures for a given uuid
@@ -28,12 +28,9 @@ class NYPLsearch(object):
 
     # Search across all (without field) or in specific field
     # (valid fields at http://www.loc.gov/standards/mods/mods-outline.html)
-    def search(self, q, field=None):
-        params = {'q': q}
-        if field:
-            params['field'] = field
-
-        return self._get('/'.join([self.base, 'search']), params)
+    def search(self, q, field=None, page=None, per_page=None):
+        url = '/'.join((self.base, 'search'))
+        return self._get(url, q=q, field=field, page=page, per_page=per_page)
 
     # Return a mods record for a given uuid
     def mods(self, uuid):
@@ -41,13 +38,13 @@ class NYPLsearch(object):
 
     # Generic get which handles call to api and setting of results
     # Return: results dict
-    def _get(self, url, params=None):
+    def _get(self, url, **params):
         self.raw_results = self.results = None
 
         headers = {"Authorization": "Token token=" + self.token}
-        params = params or dict()
-        params['page'] = self.page
-        params['per_page'] = self.per_page
+
+        params['page'] = params.get('page') or self.page
+        params['per_page'] = params.get('per_page') or self.per_page
 
         r = requests.get(".".join([url, self.format]),
                          params=params,
